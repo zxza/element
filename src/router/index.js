@@ -6,8 +6,10 @@ import seller from 'components/seller/seller'
 
 Vue.use(Router)
 
-export default new Router({
-  routes: [
+ const routes = [
+    {
+        path:'/',redirect:'/goods'
+    },
     {
         path: '/goods',component:goods
     },
@@ -17,5 +19,10 @@ export default new Router({
     {
         path:'/seller',component:seller
     }
-  ]
+];
+
+
+export default new Router({
+    linkActiveClass:'active',
+    routes
 })
