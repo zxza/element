@@ -11,7 +11,7 @@ const express = require('express')
 const app = express()
 var appData = require('../data.json')
 var seller = appData.seller
-var good = appData.goods
+var goods = appData.goods
 var ratings = appData.ratings
 var apiRoutes = express.Router()
 app.use('/api',apiRoutes)
