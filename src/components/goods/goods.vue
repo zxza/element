@@ -1,6 +1,6 @@
 <template>
     <div class="goods">
-      <div class='menu-wrapper'>
+      <div class='menu-wrapper' ref='menuWrapper'>
         <ul>
           <li v-for='item in goods' class="menu-item">
             <span class='text border-1px'>
@@ -9,9 +9,9 @@
           </li>
         </ul>
       </div>
-      <div class="foods-wrapper">
+      <div class="foods-wrapper" ref='foodWrapper'>
         <ul>
-          <li v-for = 'item in goods' class="food-list">
+          <li v-for = 'item in goods' class="food-list food-list-hook">
             <h1 class="title">{{item.name}}</h1>
             <ul>
               <li v-for = 'food in item.foods' class="food-item border-1px">
@@ -22,12 +22,10 @@
                   <h2 class="name">{{food.name}}</h2>
                   <p class="desc">{{food.description}}</p>
                   <div class="extra">
-                    <span class="count">月售{{food.sellCount}}份</span>
-                    <span>好评率{{food.rating}}%</span>
+                    <span class="count">月售{{food.sellCount}}份</span><span>好评率{{food.rating}}%</span>
                   </div>
                   <div class="price">
-                    <span class="now">¥{{food.price}}</span>
-                    <span class="old" v-show='food.oldPrice'>¥{{food.oldPrice}}</span>
+                    <span class="now">¥{{food.price}}</span><span class="old" v-show='food.oldPrice'>¥{{food.oldPrice}}</span>
                   </div>
                 </div>
               </li>
@@ -40,6 +38,8 @@
 
 <script type="text/javascript">
 
+    import BScroll from 'better-scroll';
+
     const ERR_OK = 0;
 
     export default {
@@ -50,7 +50,9 @@
       },
       data() {
         return {
-          goods: {}
+          goods: {},
+          listHeight: [],
+          scrollY: 0
         }
       },
       created() {
@@ -59,12 +61,43 @@
           response = response.body;
           if(response.errno === ERR_OK){
               this.goods = response.data
+              //数据与dom处理是异步的
+              this.$nextTick(()=> {
+                this._initScroll()
+                this._calculationHeight()
+              });
           }
         })
       },
+      computed:{
+        currentIndex() {
+          for(let i = 0;i < this.listHeight;i++){
+            
+          }
+        }
+      },
       methods: {
         _initScroll() {
-          
+          this.menuScroll = new BScroll(this.$refs.menuWrapper,{});
+
+          this.foodsScroll = new BScroll(this.$refs.foodWrapper,{
+            probeType: 3
+          });
+
+          this.foodsScroll.on('scroll',(pos) => {
+            this.scrollY = Math.abs(Math.round(pos.y))
+          })
+
+        },
+        _calculationHeight() {
+          let foodList = this.$refs.foodWrapper.getElementsByClassName('food-list-hook');
+          let height = 0;
+          this.listHeight.push(height);
+          for (let i = 0 ;i<foodList.length;i++) {
+            let item = foodList[i];
+            height += item.clientHeight;
+            this.listHeight.push(height);
+          }
         }
       }
     }
@@ -149,9 +182,10 @@
               font-size: 10px
               color: rgb(147,153,159)
             .desc
+              line-height: 12px
               margin-bottom: 8px
             .extra
-              &.count
+              .count
                 margin-right: 12px
             .price
               font-weight: 700;
