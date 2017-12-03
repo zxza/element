@@ -2,7 +2,8 @@
     <div class="goods">
       <div class='menu-wrapper' ref='menuWrapper'>
         <ul>
-          <li v-for='item in goods' class="menu-item">
+          <li v-for='(item,index) in goods' class="menu-item" :class="{'current': currentIndex === index}"
+          @click='selectMenu(index,$event)'>
             <span class='text border-1px'>
               <span v-show='item.type>0' class="icon" :class='classMap[item.type]'></span>{{item.name}}
             </span>
@@ -33,12 +34,14 @@
           </li>
         </ul>
       </div>
+      <shopcart :delivery-price='seller.deliveryPrice' :min-price='seller.minPrice'></shopcart>
     </div>
 </template>
 
 <script type="text/javascript">
 
     import BScroll from 'better-scroll';
+    import shopcart from 'components/shopCart/shopCart';
 
     const ERR_OK = 0;
 
@@ -62,7 +65,7 @@
           if(response.errno === ERR_OK){
               this.goods = response.data
               //数据与dom处理是异步的
-              this.$nextTick(()=> {
+              this.$nextTick(()=> {  //dom相关的   应该先渲染原生dom  数据与dom是异步的
                 this._initScroll()
                 this._calculationHeight()
               });
@@ -71,23 +74,39 @@
       },
       computed:{
         currentIndex() {
-          for(let i = 0;i < this.listHeight;i++){
-            
+          for(let i = 0;i < this.listHeight.length;i++){
+            let height1 = this.listHeight[i];
+            let height2 = this.listHeight[i+1];
+            if (!height2 || (this.scrollY >= height1 && this.scrollY < height2)) {
+              return i;
+            }
           }
+          return 0;
         }
+
       },
       methods: {
+        selectMenu(index,event) {
+          if(!event._constructed){
+            return;   //阻止pc端两次点击
+          }
+          let foodList = this.$refs.foodWrapper.getElementsByClassName('food-list-hook');
+          let el = foodList[index];
+          this.foodsScroll.scrollToElement(el,300)
+        },
         _initScroll() {
-          this.menuScroll = new BScroll(this.$refs.menuWrapper,{});
-
-          this.foodsScroll = new BScroll(this.$refs.foodWrapper,{
-            probeType: 3
+          this.menuScroll = new BScroll(this.$refs.menuWrapper,{
+            click: true
           });
 
+          this.foodsScroll = new BScroll(this.$refs.foodWrapper,{
+            probeType: 3   //滚动的时候  滚动的位置
+          });
+
+          //获取对应的Y值
           this.foodsScroll.on('scroll',(pos) => {
             this.scrollY = Math.abs(Math.round(pos.y))
           })
-
         },
         _calculationHeight() {
           let foodList = this.$refs.foodWrapper.getElementsByClassName('food-list-hook');
@@ -99,7 +118,11 @@
             this.listHeight.push(height);
           }
         }
+      },
+      components: {
+        shopcart:shopcart
       }
+
     }
 </script>
 
@@ -124,6 +147,14 @@
           width: 56px
           padding: 0 12px
           line-height: 14px
+          &.current
+            position: relative
+            z-index: 10
+            margin-top: -1px
+            background: #fff
+            font-weight: 700
+            .text
+              border-none()
           .text
             display: table-cell
             width: 56px
