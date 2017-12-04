@@ -37,7 +37,7 @@
           </li>
         </ul>
       </div>
-      <shopcart :delivery-price='seller.deliveryPrice' :min-price='seller.minPrice'></shopcart>
+      <shopcart :select-foods='selectFoods' :delivery-price='seller.deliveryPrice' :min-price='seller.minPrice'></shopcart>
     </div>
 </template>
 
@@ -57,7 +57,7 @@
       },
       data() {
         return {
-          goods: {},
+          goods: [],
           listHeight: [],
           scrollY: 0
         }
@@ -86,6 +86,18 @@
             }
           }
           return 0;
+        },
+        selectFoods() {
+          let foods = [];
+          this.goods.forEach((good) => {
+            //food.count的变化由cartcontrol引起  从而传递给shopCart  引起商品总价的计算
+            good.foods.forEach((food) => {
+              if(food.count) {
+                foods.push(food);
+              }
+            })
+          });
+          return foods;
         }
       },
       methods: {

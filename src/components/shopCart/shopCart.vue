@@ -6,6 +6,7 @@
           <div class="logo" :class="{'highlight':totalCount > 0}">
             <i class="icon-shopping_cart" :class="{'highlight':totalCount > 0}"></i>
           </div>
+          <!-- 购物车头上的商品件数 -->
           <div class="num" v-show="totalCount>0">
             {{totalCount}}
           </div>
@@ -32,10 +33,6 @@ export default {
       type: Array,
       default() {
         return [
-          {
-            price: 3,
-            count: 1
-          }
         ];
       }
     },
